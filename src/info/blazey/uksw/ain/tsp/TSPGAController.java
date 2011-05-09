@@ -1,5 +1,13 @@
 package info.blazey.uksw.ain.tsp;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 /**
@@ -8,10 +16,10 @@ import java.util.Random;
  */
 public class TSPGAController {
 
-  private final double mutationChance = 0.02;
-  private final int tournamentGroupSize = 3;
   private final int populationSize = 150;
   private final int generationsCount = 150;
+  private final double mutationChance = 0.02;
+  private final int tournamentGroupSize = 3;
   
   private static Random randomGenerator;
   private static int seed;
@@ -23,8 +31,6 @@ public class TSPGAController {
   }
 
   public static int nextInt(int range) {
-//    Random r = new Random();
-//    return r.nextInt(range);
     return randomGenerator.nextInt(range);
   }
 
@@ -43,13 +49,53 @@ public class TSPGAController {
     this.generation.initialize(this.populationSize);
   }
 
-  public Generation getFinalGeneration() {
+  private StringBuilder gnuplotFileContent;
+
+  public Generation getFinalGeneration() throws IOException {
+    gnuplotFileContent = new StringBuilder();
+
+    logStats(1);
     for (int i = 0; i < generationsCount; i++) {
-      Main.log(generation.getStatistics().toString());
       generation = generation.getNext();
+      logStats(2+i);
     }
-    Main.log("Final generation: " + generation.getStatistics().toString());
+    saveGnuplotFile();
+
     return this.generation;
+  }
+
+  private void logStats(int generationCounter) {
+    Main.log(generation.getStatistics().toString());
+    gnuplotFileContent.append(generation.getStatistics().getGnuplotRow(generationCounter));
+  }
+
+  private void saveGnuplotFile() throws IOException {
+    String content =
+              "# Nature inspired algorithms\n"
+            + "# Solving symetric travelling salesman problem with GA.\n"
+            + "# Błażej Owczarczyk\n"
+            + "#\n"
+            + "# generations count: " + generationsCount + "\n"
+            + "# population size: " + populationSize + "\n"
+            + "# mutation chance: " + mutationChance + "\n"
+            + "# tournament group size: " + tournamentGroupSize + "\n"
+            + "#\n"
+            + "# seed: " + seed + "\n"
+            + "#\n"
+            + "# generation-number best-individual average-individual worst-individual\n"
+            + gnuplotFileContent.toString();
+
+    DateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
+    Date date = new Date();
+    String filename = "output/TSP-GA-" + format.format(date) + ".txt";
+
+    File file = new File(filename);
+    Writer out = new OutputStreamWriter(new FileOutputStream(file));
+    try {
+      out.write(content);
+    } finally {
+      out.close();
+    }
   }
 
 }
