@@ -46,12 +46,6 @@ public class PathSciezkowaCrossoverOperatorWithEdgeRecombination implements Path
     // Get the first node of parent path.
     Node t = parent.getEdge(0).getFrom();
 
-//    if (parent.getNodesCount() > 58) {
-//      ArrayList<Node> nodes = parent.getNodes();
-//      Collections.sort(nodes);
-//      Main.log(nodes.toString());
-//    }
-
     // Add all nodes to child's path.
     while (child.getNodesCount() != parent.getNodesCount() && t != null) {
       // Add previously chosen node.
@@ -131,9 +125,11 @@ public class PathSciezkowaCrossoverOperatorWithEdgeRecombination implements Path
   }
 
   private void fillNeighboursList() {
+    // For each of the parents
     for (Path parent : parents) {
       int index = 0;
       Edge edge;
+      // Add all arcs
       while ((edge = parent.getEdge(index++)) != null) {
         addNeighbours(edge);
       }

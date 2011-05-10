@@ -77,6 +77,10 @@ public abstract class GenerationTSP implements Generation {
       }
     }
     Main.log("Performed " + counter + " mutations");
+
+    for (Path p : offspring) {
+      Main.log(p.getNodes().toString());
+    }
     
     return this.getNewGeneration(offspring);
   }

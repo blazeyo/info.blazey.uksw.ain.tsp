@@ -88,17 +88,17 @@ public class PathSciezkowa extends Path {
 
   public void initializeWithRandomValue() {
     ArrayList<Node> towns = graph.getNodes();
-    Main.log("Int sequence:");
-    StringBuilder sb = new StringBuilder();
+//    Main.log("Int sequence:");
+//    StringBuilder sb = new StringBuilder();
     for (int i = 0; i < graph.getSize(); i++) {
       int random = TSPGAController.nextInt(towns.size());
       Node t = towns.get(random);
       towns.remove(t);
       this.appendNode(t);
 
-      sb.append(random + " ");
+//      sb.append(random + " ");
     }
-    Main.log(sb.toString());
+//    Main.log(sb.toString());
   }
 
   @Override

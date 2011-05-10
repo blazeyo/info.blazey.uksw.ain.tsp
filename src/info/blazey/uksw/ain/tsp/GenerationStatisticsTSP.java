@@ -48,7 +48,7 @@ public class GenerationStatisticsTSP implements GenerationStatistics {
   }
 
   public String getGnuplotRow(int generationNumber) {
-    return generationNumber + "\t" + getBest() + "\t" + getAverage() + "\t" + getWorst() + "\n";
+    return generationNumber + "\t\t" + getBest() + "\t\t" + getAverage() + "\t\t" + getWorst() + "\n";
   }
 
 }

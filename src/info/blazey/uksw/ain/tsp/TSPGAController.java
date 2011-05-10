@@ -16,9 +16,9 @@ import java.util.Random;
  */
 public class TSPGAController {
 
-  private final int populationSize = 150;
-  private final int generationsCount = 150;
-  private final double mutationChance = 0.02;
+  private final int populationSize = 10;
+  private final int generationsCount = 1;
+  private final double mutationChance = 0.3;
   private final int tournamentGroupSize = 3;
   
   private static Random randomGenerator;
@@ -85,17 +85,39 @@ public class TSPGAController {
             + "# generation-number best-individual average-individual worst-individual\n"
             + gnuplotFileContent.toString();
 
-    DateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
-    Date date = new Date();
-    String filename = "output/TSP-GA-" + format.format(date) + ".txt";
-
-    File file = new File(filename);
-    Writer out = new OutputStreamWriter(new FileOutputStream(file));
+    File outputFile = getGnuplotFileHandler();
+    Writer out = new OutputStreamWriter(new FileOutputStream(outputFile));
     try {
       out.write(content);
     } finally {
       out.close();
     }
+
+    GnuplotImageGenerator g = new GnuplotImageGenerator(outputFile, "TSP GA", "Generations", "Path Length");
+    g.addPlot(1, 2, "Best");
+    g.addPlot(1, 3, "Average");
+    g.generate();
+  }
+
+  private File getGnuplotFileHandler() throws IOException {
+    File dataFile = new File("TSP-GA");
+    if (dataFile.exists()) {
+      DateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
+      String newFileName = "TSP-GA-" + format.format(new Date());
+
+      File dataFileCopy = new File(newFileName);
+      dataFile.renameTo(dataFileCopy);
+      dataFile = new File("TSP-GA");
+
+      File imageFile = new File(dataFile.getPath() + ".png");
+      if (imageFile.exists()) {
+        File imageFileCopy = new File(newFileName + ".png");
+        imageFile.renameTo(imageFileCopy);
+      }
+    } else {
+      dataFile.createNewFile();
+    }
+    return dataFile;
   }
 
 }

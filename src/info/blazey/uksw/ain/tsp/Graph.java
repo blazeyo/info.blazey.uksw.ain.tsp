@@ -78,6 +78,17 @@ public abstract class Graph {
     return new ArrayList<Node>(edges.keySet());
   }
 
+  @Override
+  public String toString() {
+    StringBuilder output = new StringBuilder();
+    for (Node n : getNodes()) {
+      for (Edge e : getTownEdges(n)) {
+        output.append(e.toString()).append("\n");
+      }
+    }
+    return output.toString();
+  }
+
   class EdgeExistsException extends Exception {
 
     public EdgeExistsException() { }
