@@ -79,6 +79,7 @@ public class PathSciezkowa extends Path {
       }
       distance += graph.getEdge(from, to).getDistance();
     }
+    distance += graph.getEdge(path.get(path.size() - 1), path.get(0)).getDistance();
     return distance;
   }
 

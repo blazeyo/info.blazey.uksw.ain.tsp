@@ -16,7 +16,7 @@ public class Main {
         Graph graph = TSPLibParser.getGraph("data/brazil58.tsp");
 
 //        PathCrossoverOperator pco = new PathSciezkowaCrossoverOperatorWithEdgeRecombination();
-//
+
 //        for (int i = 0; i < 50; i++) {
 //          PathSciezkowa p1 = new PathSciezkowa(graph);
 //          p1.initializeWithRandomValue();

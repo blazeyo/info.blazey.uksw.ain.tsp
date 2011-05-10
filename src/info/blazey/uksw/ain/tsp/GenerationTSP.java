@@ -57,16 +57,7 @@ public abstract class GenerationTSP implements Generation {
     population = selectionOperator.filter(population);
 
     // Crossover
-    int limit = population.size() / 2;
-    for (int i = 0; i < limit; i++) {
-      Path firstParent = getRandomParent();
-      population.remove(firstParent);
-      Path secondParent = getRandomParent();
-      population.remove(secondParent);
-
-      offspring.addAll(crossoverOperator.getChildren(firstParent, secondParent));
-    }
-    Main.log("Performed " + limit + " crossovers");
+    offspring = crossoverOperator.getOffspring(population);
 
     // Mutation
     int counter = 0;
@@ -77,16 +68,8 @@ public abstract class GenerationTSP implements Generation {
       }
     }
     Main.log("Performed " + counter + " mutations");
-
-    for (Path p : offspring) {
-      Main.log(p.getNodes().toString());
-    }
     
     return this.getNewGeneration(offspring);
-  }
-
-  private Path getRandomParent() {
-    return population.get(TSPGAController.nextInt(population.size()));
   }
 
   public Path getBestIndividual() {

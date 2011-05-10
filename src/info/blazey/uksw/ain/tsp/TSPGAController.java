@@ -16,10 +16,11 @@ import java.util.Random;
  */
 public class TSPGAController {
 
-  private final int populationSize = 10;
-  private final int generationsCount = 1;
-  private final double mutationChance = 0.3;
-  private final int tournamentGroupSize = 3;
+  private final int populationSize = 150;
+  private final int generationsCount = 500;
+  private final double mutationChance = 0.05;
+  private final int tournamentGroupSize = 2;
+  private final double crossoverChance = 0.7;
   
   private static Random randomGenerator;
   private static int seed;
@@ -42,7 +43,10 @@ public class TSPGAController {
 
   public TSPGAController(Graph graph) {
     PathSciezkowaMutationOperatorSwap mutationOperator = new PathSciezkowaMutationOperatorSwap(this.mutationChance);
-    PathSciezkowaCrossoverOperatorWithEdgeRecombination crossoverOperator = new PathSciezkowaCrossoverOperatorWithEdgeRecombination();
+
+//    PathSciezkowaCrossoverOperatorWithEdgeRecombination crossoverOperator = new PathSciezkowaCrossoverOperatorWithEdgeRecombination();
+    PathCrossoverOperatorOX crossoverOperator = new PathCrossoverOperatorOX(crossoverChance);
+
     PathSelectionOperatorTournament selectionOperator = new PathSelectionOperatorTournament(this.tournamentGroupSize);
 
     this.generation = new GenerationTSPSciezkowa(graph, selectionOperator, crossoverOperator, mutationOperator);

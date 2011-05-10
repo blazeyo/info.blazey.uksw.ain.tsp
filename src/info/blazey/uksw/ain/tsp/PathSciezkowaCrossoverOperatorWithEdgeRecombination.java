@@ -7,7 +7,11 @@ import java.util.ArrayList;
  *
  * @author blazej
  */
-public class PathSciezkowaCrossoverOperatorWithEdgeRecombination implements PathCrossoverOperator {
+public class PathSciezkowaCrossoverOperatorWithEdgeRecombination extends PathCrossoverOperator {
+
+  public PathSciezkowaCrossoverOperatorWithEdgeRecombination(double crossoverChance) {
+    super(crossoverChance);
+  }
 
   private ArrayList<Path> parents;
   private HashMap<Node, ArrayList<Node>> neighboursList;
@@ -19,7 +23,7 @@ public class PathSciezkowaCrossoverOperatorWithEdgeRecombination implements Path
    * @param parent2
    * @return children
    */
-  public ArrayList<Path> getChildren(Path parent1, Path parent2) {
+  protected ArrayList<Path> getChildren(Path parent1, Path parent2) {
     parents = new ArrayList<Path>();
     parents.add(parent1);
     parents.add(parent2);
