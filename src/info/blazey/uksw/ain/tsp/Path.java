@@ -37,6 +37,9 @@ public abstract class Path implements Comparable<Path> {
 
   public abstract void initializeWithRandomValue();
 
+  @Override
+  public abstract Object clone();
+
   public int compareTo(Path o) {
     if (this.getDistance() > o.getDistance()) {
       return 1;

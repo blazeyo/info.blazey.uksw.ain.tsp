@@ -119,4 +119,13 @@ public class PathSciezkowa extends Path {
     path.add(index, node);
   }
 
+  @Override
+  public Object clone() {
+    Path p = new PathSciezkowa(graph);
+    for (Node n : path) {
+      p.appendNode(n);
+    }
+    return p;
+  }
+
 }

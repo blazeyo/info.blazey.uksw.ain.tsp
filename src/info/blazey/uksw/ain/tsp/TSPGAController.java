@@ -47,7 +47,9 @@ public class TSPGAController {
 //    PathSciezkowaCrossoverOperatorWithEdgeRecombination crossoverOperator = new PathSciezkowaCrossoverOperatorWithEdgeRecombination();
     PathCrossoverOperatorOX crossoverOperator = new PathCrossoverOperatorOX(crossoverChance);
 
-    PathSelectionOperatorTournament selectionOperator = new PathSelectionOperatorTournament(this.tournamentGroupSize);
+//    PathSelectionOperatorTournament selectionOperator = new PathSelectionOperatorTournament(this.tournamentGroupSize);
+    PathSelectionOperator selectionOperator = new PathSelectionOperatorRouletteWheel();
+
 
     this.generation = new GenerationTSPSciezkowa(graph, selectionOperator, crossoverOperator, mutationOperator);
     this.generation.initialize(this.populationSize);
