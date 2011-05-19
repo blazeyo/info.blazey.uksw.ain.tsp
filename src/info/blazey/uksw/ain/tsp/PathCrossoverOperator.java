@@ -1,6 +1,7 @@
 package info.blazey.uksw.ain.tsp;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  *
@@ -16,33 +17,43 @@ public abstract class PathCrossoverOperator {
 
   private ArrayList<Path> getIndividualsThatWillHaveChildren(ArrayList<Path> population) {
     ArrayList<Path> parents = new ArrayList<Path>();
+
     for (Path p : population) {
       if (TSPGAController.nextDouble() < crossoverChance) {
         parents.add(p);
       }
     }
+    
     return parents;
   }
 
-  public ArrayList<Path> getOffspring(ArrayList<Path> population) {
+  public ArrayList<Path> getOffspring(GenerationTSP generation) {
+    ArrayList<Path> population = generation.getPopulation();
     ArrayList<Path> offspring = new ArrayList<Path>();
+    
     int populationSize = population.size();
-    population = getIndividualsThatWillHaveChildren(population);
 
-    int limit = population.size() / 2;
-    for (int i = 0; i < limit; i++) {
-      Path firstParent = getRandomParent(population);
-      population.remove(firstParent);
-      Path secondParent = getRandomParent(population);
-      population.remove(secondParent);
+    Collections.sort(population);
+
+    ArrayList<Path> parents = getIndividualsThatWillHaveChildren(population);
+
+    population.removeAll(parents);
+
+    while (parents.size() > 0) {
+      int firstParentIndex = TSPGAController.nextInt(parents.size());
+      Path firstParent = parents.get(firstParentIndex);
+      parents.remove(firstParentIndex);
+
+      int secondParentIndex = TSPGAController.nextInt(parents.size());
+      Path secondParent = parents.get(secondParentIndex);
+      parents.remove(secondParentIndex);
 
       offspring.addAll(getChildren(firstParent, secondParent));
     }
-    Main.log("Performed " + limit + " crossovers");
-    while (offspring.size() != populationSize) {
-      Path randomIndividual = offspring.get(0).getEmptyIndividual();
-      randomIndividual.initializeWithRandomValue();
-      offspring.add(randomIndividual);
+
+    int i = 0;
+    while (offspring.size() < populationSize) {
+      offspring.add(population.get(i++));
     }
 
     return offspring;

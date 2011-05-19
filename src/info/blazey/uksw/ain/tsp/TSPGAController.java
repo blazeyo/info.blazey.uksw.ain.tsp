@@ -1,14 +1,31 @@
 package info.blazey.uksw.ain.tsp;
 
+import info.blazey.uksw.ain.tsp.Graph.EdgeExistsException;
+import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /**
  *
@@ -16,11 +33,11 @@ import java.util.Random;
  */
 public class TSPGAController {
 
-  private final int populationSize = 150;
-  private final int generationsCount = 500;
-  private final double mutationChance = 0.05;
-  private final int tournamentGroupSize = 2;
-  private final double crossoverChance = 0.7;
+  private final int populationSize = 50;
+  private final int generationsCount = 50;
+  private final double mutationChance = 0.5;
+  private final int tournamentGroupSize = 5;
+  private final double crossoverChance = 1;
   
   private static Random randomGenerator;
   private static int seed;
@@ -41,41 +58,63 @@ public class TSPGAController {
 
   private Generation generation;
 
-  public TSPGAController(Graph graph) {
-    PathSciezkowaMutationOperatorSwap mutationOperator = new PathSciezkowaMutationOperatorSwap(this.mutationChance);
+  private JFrame frame;
 
-//    PathSciezkowaCrossoverOperatorWithEdgeRecombination crossoverOperator = new PathSciezkowaCrossoverOperatorWithEdgeRecombination();
-    PathCrossoverOperatorOX crossoverOperator = new PathCrossoverOperatorOX(crossoverChance);
+  public TSPGAController() throws FileNotFoundException, EdgeExistsException, IOException {
+    frame = new TSPGAControllerFrame();
+  }
 
-//    PathSelectionOperatorTournament selectionOperator = new PathSelectionOperatorTournament(this.tournamentGroupSize);
-    PathSelectionOperator selectionOperator = new PathSelectionOperatorRouletteWheel();
+  private PathSelectionOperator[] getAvailableSelectionOperators() {
+    PathSelectionOperator[] result = new PathSelectionOperator[2];
+    result[0] = new PathSelectionOperatorRouletteWheel();
+    result[1] = new PathSelectionOperatorTournament(this.tournamentGroupSize);
 
+    return result;
+  }
 
-    this.generation = new GenerationTSPSciezkowa(graph, selectionOperator, crossoverOperator, mutationOperator);
-    this.generation.initialize(this.populationSize);
+  private PathCrossoverOperator[] getAvailableCrossoverOperators() {
+    PathCrossoverOperator[] result = new PathCrossoverOperator[2];
+    result[0] = new PathSciezkowaCrossoverOperatorWithEdgeRecombination(crossoverChance);
+    result[1] = new PathCrossoverOperatorOX(crossoverChance);
+
+    return result;
+  }
+
+  private PathMutationOperator[] getAvailableMutationOperators() {
+    PathMutationOperator[] result = new PathMutationOperator[1];
+    result[0] = new PathSciezkowaMutationOperatorSwap(mutationChance);
+
+    return result;
+  }
+
+  public String[] getAvaiableGraphs() {
+    String path = "info/blazey/uksw/ain/tsp/resources/";
+    Set<String> graphFiles = new HashSet<String>();
+
+    try {
+      String[] resources = ResourceListing.getResourceListing(TSPGAController.class, path);
+      for (String filename : resources) {
+        if (TSPLibParser.graphIsSupported(filename)) {
+          graphFiles.add(filename);
+        }
+      }
+    } catch (URISyntaxException ex) {
+      Logger.getLogger(TSPGAController.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (IOException ex) {
+      Logger.getLogger(TSPGAController.class.getName()).log(Level.SEVERE, null, ex);
+    }
+
+    return graphFiles.toArray(new String[0]);
   }
 
   private StringBuilder gnuplotFileContent;
-
-  public Generation getFinalGeneration() throws IOException {
-    gnuplotFileContent = new StringBuilder();
-
-    logStats(1);
-    for (int i = 0; i < generationsCount; i++) {
-      generation = generation.getNext();
-      logStats(2+i);
-    }
-    saveGnuplotFile();
-
-    return this.generation;
-  }
 
   private void logStats(int generationCounter) {
     Main.log(generation.getStatistics().toString());
     gnuplotFileContent.append(generation.getStatistics().getGnuplotRow(generationCounter));
   }
 
-  private void saveGnuplotFile() throws IOException {
+  private File saveGnuplotFile() {
     String content =
               "# Nature inspired algorithms\n"
             + "# Solving symetric travelling salesman problem with GA.\n"
@@ -91,18 +130,31 @@ public class TSPGAController {
             + "# generation-number best-individual average-individual worst-individual\n"
             + gnuplotFileContent.toString();
 
-    File outputFile = getGnuplotFileHandler();
-    Writer out = new OutputStreamWriter(new FileOutputStream(outputFile));
+    Writer out = null;
     try {
-      out.write(content);
-    } finally {
-      out.close();
-    }
+      File outputFile = getGnuplotFileHandler();
+      out = new OutputStreamWriter(new FileOutputStream(outputFile));
 
-    GnuplotImageGenerator g = new GnuplotImageGenerator(outputFile, "TSP GA", "Generations", "Path Length");
-    g.addPlot(1, 2, "Best");
-    g.addPlot(1, 3, "Average");
-    g.generate();
+      out.write(content);
+
+
+      GnuplotImageGenerator g = new GnuplotImageGenerator(outputFile, "TSP GA", "Generations", "Path Length");
+      g.addPlot(1, 2, "Best");
+      g.addPlot(1, 3, "Average");
+      g.addPlot(1, 4, "Worst");
+      g.generate();
+
+      return outputFile;
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        out.close();
+      } catch (IOException ex) {
+        Logger.getLogger(TSPGAController.class.getName()).log(Level.SEVERE, null, ex);
+      }
+    }
+    return null;
   }
 
   private File getGnuplotFileHandler() throws IOException {
@@ -124,6 +176,126 @@ public class TSPGAController {
       dataFile.createNewFile();
     }
     return dataFile;
+  }
+
+  class TSPGAControllerFrame extends JFrame {
+
+    public TSPGAControllerFrame() {
+      super("Travelling salesman problem");
+      JPanel contentPanel = new JPanel();
+      setContentPane(contentPanel);
+
+      BoxLayout b = new BoxLayout(contentPanel, BoxLayout.Y_AXIS);
+      contentPanel.setLayout(b);
+
+      contentPanel.add(getSelectionOperatorPanel());
+      contentPanel.add(getCrossoverOperatorPanel());
+      contentPanel.add(getMutationOperatorPanel());
+      contentPanel.add(getGraphPanel());
+
+      contentPanel.add(getResultsPanel());
+
+      JButton submit = new JButton(new SubmitAction());
+      contentPanel.add(submit);
+
+      pack();
+      setVisible(true);
+      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
+
+    private JComboBox selectionOperatorCombo;
+    private JComboBox crossoverOperatorCombo;
+    private JComboBox mutationOperatorCombo;
+    private JComboBox graphCombo;
+
+    private JPanel resultsPanel;
+    private JLabel resultImageLabel;
+
+    private JPanel getSelectionOperatorPanel() {
+      JPanel selectionOperatorsPanel = new JPanel();
+      selectionOperatorsPanel.add(new JLabel("Selection operator"));
+      selectionOperatorCombo = new JComboBox(getAvailableSelectionOperators());
+      selectionOperatorsPanel.add(selectionOperatorCombo);
+
+      return selectionOperatorsPanel;
+    }
+
+    private JPanel getCrossoverOperatorPanel() {
+      JPanel crossoverOperatorsPanel = new JPanel();
+      crossoverOperatorsPanel.add(new JLabel("Crossover operator"));
+      crossoverOperatorCombo = new JComboBox(getAvailableCrossoverOperators());
+      crossoverOperatorsPanel.add(crossoverOperatorCombo);
+
+      return crossoverOperatorsPanel;
+    }
+
+    private JPanel getMutationOperatorPanel() {
+      JPanel mutationOperatorsPanel = new JPanel();
+      mutationOperatorsPanel.add(new JLabel("Mutation operator"));
+      mutationOperatorCombo = new JComboBox(getAvailableMutationOperators());
+      mutationOperatorsPanel.add(mutationOperatorCombo);
+
+      return mutationOperatorsPanel;
+    }
+
+    private JPanel getGraphPanel() {
+      JPanel graphPanel = new JPanel();
+      graphPanel.add(new JLabel("TSPLIB graph"));
+      graphCombo = new JComboBox(getAvaiableGraphs());
+      graphPanel.add(graphCombo);
+
+      return graphPanel;
+    }
+
+    private JPanel getResultsPanel() {
+      resultsPanel = new JPanel();
+      resultsPanel.add(new JLabel("Result"));
+      resultImageLabel = new JLabel(new ImageIcon("TSP-GA.png"));
+      resultsPanel.add(resultImageLabel);
+
+      return resultsPanel;
+    }
+
+    private class SubmitAction extends AbstractAction {
+
+      public SubmitAction() {
+        super("Run");
+      }
+
+      public void actionPerformed(ActionEvent e) {
+        Graph graph = TSPLibParser.getGraph((String) graphCombo.getSelectedItem());
+        PathSelectionOperator selectionOperator = (PathSelectionOperator) selectionOperatorCombo.getSelectedItem();
+        PathCrossoverOperator crossoverOperator = (PathCrossoverOperator) crossoverOperatorCombo.getSelectedItem();
+        PathMutationOperator mutationOperator = (PathMutationOperator) mutationOperatorCombo.getSelectedItem();
+
+        generation = new GenerationTSPSciezkowa(graph, selectionOperator, crossoverOperator, mutationOperator);
+        generation.initialize(populationSize);
+        gnuplotFileContent = new StringBuilder();
+
+        logStats(1);
+        for (int i = 0; i < generationsCount; i++) {
+          generation = generation.getNext();
+          logStats(2+i);
+        }
+        File output = saveGnuplotFile();
+
+        File imageFile = new File(output.getPath() + ".png");
+        try {
+          while (!imageFile.exists()) {
+            Thread.sleep(1000);
+            Main.log("waiting for gnuplot to generate file");
+          }
+          resultImageLabel.setIcon(new ImageIcon(ImageIO.read(imageFile)));
+        } catch (Exception ex) {
+          Logger.getLogger(TSPGAController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        resultImageLabel.repaint();
+        repaint();
+        pack();
+      }
+
+    }
+
   }
 
 }

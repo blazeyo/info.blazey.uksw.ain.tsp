@@ -27,4 +27,9 @@ public class PathSciezkowaMutationOperatorSwap implements PathMutationOperator {
     return TSPGAController.nextDouble() <= chance;
   }
 
+  @Override
+  public String toString() {
+    return "Swap 2 random towns";
+  }
+
 }

@@ -38,4 +38,9 @@ public class PathSelectionOperatorTournament implements PathSelectionOperator {
     return group.get(0);
   }
 
+  @Override
+  public String toString() {
+    return "Tournament selection";
+  }
+
 }

@@ -156,9 +156,12 @@ public class PathSciezkowaCrossoverOperatorWithEdgeRecombination extends PathCro
     neighboursList.put(from, neighbours);
   }
 
-  class PathCrossoverException extends Exception {
+  @Override
+  public String toString() {
+    return "Edge recombination";
+  }
 
-    
+  class PathCrossoverException extends Exception {
 
   }
 

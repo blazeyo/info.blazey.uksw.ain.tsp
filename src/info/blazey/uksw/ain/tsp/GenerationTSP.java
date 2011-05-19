@@ -57,7 +57,7 @@ public abstract class GenerationTSP implements Generation {
     population = selectionOperator.filter(population);
 
     // Crossover
-    offspring = crossoverOperator.getOffspring(population);
+    offspring = crossoverOperator.getOffspring(this);
 
     // Mutation
     int counter = 0;

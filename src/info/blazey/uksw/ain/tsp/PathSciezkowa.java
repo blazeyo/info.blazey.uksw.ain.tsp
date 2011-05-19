@@ -25,7 +25,7 @@ public class PathSciezkowa extends Path {
    * @return success
    */
   public boolean appendNode(Node t) {
-    if (!path.contains(t)) {
+    if (!contains(t)) {
       // Append it.
       path.add(t);
       return true;
@@ -91,6 +91,7 @@ public class PathSciezkowa extends Path {
     ArrayList<Node> towns = graph.getNodes();
 //    Main.log("Int sequence:");
 //    StringBuilder sb = new StringBuilder();
+    while (path.size() < graph.getNodes().size())
     for (int i = 0; i < graph.getSize(); i++) {
       int random = TSPGAController.nextInt(towns.size());
       Node t = towns.get(random);

@@ -1,6 +1,10 @@
 package info.blazey.uksw.ain.tsp;
 
+import info.blazey.uksw.ain.tsp.Graph.EdgeExistsException;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  *
@@ -11,10 +15,8 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws IOException {
-      try {
-        Graph graph = TSPLibParser.getGraph("data/brazil58.tsp");
-
+    public static void main(String[] args) throws IOException, FileNotFoundException, EdgeExistsException, URISyntaxException {
+//      try {
 //        PathCrossoverOperator pco = new PathSciezkowaCrossoverOperatorWithEdgeRecombination();
 
 //        for (int i = 0; i < 50; i++) {
@@ -32,13 +34,15 @@ public class Main {
 //          }
 //        }
 
-        TSPGAController controller = new TSPGAController(graph);
-        Generation finalGeneration = controller.getFinalGeneration();
+      
+//      Main.log(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath()).toString());
 
-        log(finalGeneration.getBestIndividual().toString());
-      } catch (Graph.EdgeExistsException ex) {
-        log("Edge already exists");
-      }
+        TSPGAController controller = new TSPGAController();
+
+//        log(finalGeneration.getBestIndividual().toString());
+//      } catch (Graph.EdgeExistsException ex) {
+//        log("Edge already exists");
+//      }
     }
 
     public static void log(String message) {
