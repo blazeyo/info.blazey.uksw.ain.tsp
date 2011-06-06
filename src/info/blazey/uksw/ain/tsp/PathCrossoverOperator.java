@@ -15,6 +15,10 @@ public abstract class PathCrossoverOperator {
     this.crossoverChance = crossoverChance;
   }
 
+  public void setCrossoverChance(double crossoverChance) {
+    this.crossoverChance = crossoverChance;
+  }
+
   private ArrayList<Path> getIndividualsThatWillHaveChildren(ArrayList<Path> population) {
     ArrayList<Path> parents = new ArrayList<Path>();
 
@@ -37,9 +41,10 @@ public abstract class PathCrossoverOperator {
 
     ArrayList<Path> parents = getIndividualsThatWillHaveChildren(population);
 
-    population.removeAll(parents);
+//    ArrayList<Path> initialParents = (ArrayList<Path>) parents.clone();
+    ArrayList<Path> initialParents = new ArrayList<Path>(parents);
 
-    while (parents.size() > 0) {
+    while (parents.size() > 1) {
       int firstParentIndex = TSPGAController.nextInt(parents.size());
       Path firstParent = parents.get(firstParentIndex);
       parents.remove(firstParentIndex);
@@ -51,18 +56,24 @@ public abstract class PathCrossoverOperator {
       offspring.addAll(getChildren(firstParent, secondParent));
     }
 
-    int i = 0;
+    // Add remaining parent
+    if (parents.size() > 0) {
+      offspring.add(parents.get(0));
+    }
+
     while (offspring.size() < populationSize) {
-      offspring.add(population.get(i++));
+      int firstParentIndex = TSPGAController.nextInt(initialParents.size());
+      Path firstParent = initialParents.get(firstParentIndex);
+
+      int secondParentIndex = TSPGAController.nextInt(initialParents.size());
+      Path secondParent = initialParents.get(secondParentIndex);
+
+      offspring.addAll(getChildren(firstParent, secondParent));
     }
 
     return offspring;
   }
 
   protected abstract ArrayList<Path> getChildren(Path parent1, Path parent2);
-
-  private Path getRandomParent(ArrayList<Path> population) {
-    return population.get(TSPGAController.nextInt(population.size()));
-  }
 
 }

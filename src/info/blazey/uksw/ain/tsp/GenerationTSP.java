@@ -17,7 +17,7 @@ public abstract class GenerationTSP implements Generation {
   protected PathSelectionOperator selectionOperator;
   protected PathMutationOperator mutationOperator;
 
-  private GenerationStatistics stats = new GenerationStatisticsTSP(this);
+  private GenerationStatistics stats;
 
   public abstract Path getNewIndividual();
   public abstract Generation getNewGeneration(ArrayList<Path> population);
@@ -28,6 +28,11 @@ public abstract class GenerationTSP implements Generation {
     this.selectionOperator = selection;
     this.crossoverOperator = crossover;
     this.mutationOperator = mutation;
+    stats = new GenerationStatisticsTSP(this);
+  }
+
+  public Graph getGraph() {
+    return graph;
   }
 
   public void initialize(int parentsCount) {

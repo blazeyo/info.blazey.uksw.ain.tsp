@@ -52,7 +52,20 @@ public abstract class Path implements Comparable<Path> {
 
   @Override
   public String toString() {
-    return "Path (" + this.getNodesCount() + ") length: " + this.getDistance();
+    StringBuilder sb = new StringBuilder();
+    double distance = 0;
+    for (int i = 0; i < getNodesCount() - 1; i++) {
+      Edge e = getEdge(i);
+      sb.append(e.toString()).append("\n");
+      distance += e.getDistance();
+    }
+    ArrayList<Node> nodes = getNodes();
+    distance += graph.getEdge(nodes.get(0), nodes.get(getNodesCount() - 1)).getDistance();
+
+    sb.append("Tour length: " + distance);
+
+    return sb.toString();
+//    return "Path (" + this.getNodesCount() + ") length: " + this.getDistance();
   }
 
 }

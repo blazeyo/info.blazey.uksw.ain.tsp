@@ -33,6 +33,14 @@ public abstract class Graph {
     return edges.keySet().size();
   }
 
+  private Path shortestTour = null;
+  public Path getShortestTour() {
+    return shortestTour;
+  }
+  void setShortestTour(Path p) {
+    shortestTour = p;
+  }
+
   private HashMap<Node, ArrayList<Edge>> edges;
 
   public Graph() {
@@ -41,7 +49,7 @@ public abstract class Graph {
 
   public abstract void addEdge(Node from, Node to, double distance) throws Exception;
 
-  protected boolean edgeExists(ArrayList<Edge> townEdges, Node to) {
+  public boolean edgeExists(ArrayList<Edge> townEdges, Node to) {
     // Check if this edge has not been inserted
     for (Edge e : townEdges) {
       if (e.getTo().equals(to)) {
@@ -51,7 +59,7 @@ public abstract class Graph {
     return false;
   }
   
-  protected ArrayList<Edge> getTownEdges(Node from) {
+  public ArrayList<Edge> getTownEdges(Node from) {
     ArrayList<Edge> townEdges = edges.get(from);
     // Initialize edges vector when inserting new town.
     if (townEdges == null) {

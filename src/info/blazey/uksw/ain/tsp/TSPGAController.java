@@ -26,6 +26,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  *
@@ -33,18 +34,22 @@ import javax.swing.JPanel;
  */
 public class TSPGAController {
 
-  private final int populationSize = 50;
-  private final int generationsCount = 50;
-  private final double mutationChance = 0.5;
+  private final int populationSize = 150;
+  private final int generationsCount = 150;
+  private final double mutationChance = 0.1;
   private final int tournamentGroupSize = 5;
-  private final double crossoverChance = 1;
+  private final double crossoverChance = 0.95;
   
   private static Random randomGenerator;
   private static int seed;
 
   static {
-    Random r = new Random();
-    seed = r.nextInt();
+    resetSeed();
+  }
+
+  static void resetSeed() {
+    Date time = new Date();
+    seed = (int) time.getTime();
     randomGenerator = new Random(seed);
   }
 
@@ -56,6 +61,18 @@ public class TSPGAController {
     return randomGenerator.nextDouble();
   }
 
+  private static Path shortestPath = null;
+
+  static void saveShortestPath(Path p) {
+    if (shortestPath == null || p.getDistance() < shortestPath.getDistance()) {
+      shortestPath = p;
+    }
+  }
+
+  static Path getShortestPath() {
+    return shortestPath;
+  }
+
   private Generation generation;
 
   private JFrame frame;
@@ -65,9 +82,10 @@ public class TSPGAController {
   }
 
   private PathSelectionOperator[] getAvailableSelectionOperators() {
-    PathSelectionOperator[] result = new PathSelectionOperator[2];
-    result[0] = new PathSelectionOperatorRouletteWheel();
-    result[1] = new PathSelectionOperatorTournament(this.tournamentGroupSize);
+//    PathSelectionOperator[] result = new PathSelectionOperator[2];
+//    result[0] = new PathSelectionOperatorRouletteWheel();
+    PathSelectionOperator[] result = new PathSelectionOperator[1];
+    result[0] = new PathSelectionOperatorTournament(this.tournamentGroupSize);
 
     return result;
   }
@@ -81,30 +99,34 @@ public class TSPGAController {
   }
 
   private PathMutationOperator[] getAvailableMutationOperators() {
-    PathMutationOperator[] result = new PathMutationOperator[1];
+    PathMutationOperator[] result = new PathMutationOperator[2];
     result[0] = new PathSciezkowaMutationOperatorSwap(mutationChance);
+    result[1] = new PathSciezkowaMutationOperatorInversion(mutationChance);
 
     return result;
   }
 
   public String[] getAvaiableGraphs() {
-    String path = "info/blazey/uksw/ain/tsp/resources/";
-    Set<String> graphFiles = new HashSet<String>();
-
-    try {
-      String[] resources = ResourceListing.getResourceListing(TSPGAController.class, path);
-      for (String filename : resources) {
-        if (TSPLibParser.graphIsSupported(filename)) {
-          graphFiles.add(filename);
-        }
-      }
-    } catch (URISyntaxException ex) {
-      Logger.getLogger(TSPGAController.class.getName()).log(Level.SEVERE, null, ex);
-    } catch (IOException ex) {
-      Logger.getLogger(TSPGAController.class.getName()).log(Level.SEVERE, null, ex);
-    }
-
-    return graphFiles.toArray(new String[0]);
+    String[] names = {"resources/berlin52.tsp"};
+    return names;
+//    String path = "info/blazey/uksw/ain/tsp/resources/";
+//    Set<String> graphFiles = new HashSet<String>();
+//
+//    try {
+//      String[] resources = ResourceListing.getResourceListing(TSPGAController.class, path);
+//      for (String filename : resources) {
+//        filename = "resources/" + filename;
+//        if (TSPLibParser.graphIsSupported(filename)) {
+//          graphFiles.add(filename);
+//        }
+//      }
+//    } catch (URISyntaxException ex) {
+//      Logger.getLogger(TSPGAController.class.getName()).log(Level.SEVERE, null, ex);
+//    } catch (IOException ex) {
+//      Logger.getLogger(TSPGAController.class.getName()).log(Level.SEVERE, null, ex);
+//    }
+//
+//    return graphFiles.toArray(new String[0]);
   }
 
   private StringBuilder gnuplotFileContent;
@@ -138,10 +160,11 @@ public class TSPGAController {
       out.write(content);
 
 
-      GnuplotImageGenerator g = new GnuplotImageGenerator(outputFile, "TSP GA", "Generations", "Path Length");
+      GnuplotImageGenerator g = new GnuplotImageGenerator(outputFile, "TSP GA Best path length: " + TSPGAController.getShortestPath().getDistance(), "Generations", "Path Length");
       g.addPlot(1, 2, "Best");
       g.addPlot(1, 3, "Average");
-      g.addPlot(1, 4, "Worst");
+//      g.addPlot(1, 4, "Worst");
+      g.addPlot(1, 5, "Optimal");
       g.generate();
 
       return outputFile;
@@ -185,13 +208,18 @@ public class TSPGAController {
       JPanel contentPanel = new JPanel();
       setContentPane(contentPanel);
 
-      BoxLayout b = new BoxLayout(contentPanel, BoxLayout.Y_AXIS);
+      BoxLayout b = new BoxLayout(contentPanel, BoxLayout.X_AXIS);
       contentPanel.setLayout(b);
 
-      contentPanel.add(getSelectionOperatorPanel());
-      contentPanel.add(getCrossoverOperatorPanel());
-      contentPanel.add(getMutationOperatorPanel());
-      contentPanel.add(getGraphPanel());
+      JPanel settingsPanel = new JPanel();
+      settingsPanel.add(getGeneralSettingsPanel());
+      settingsPanel.add(getSelectionOperatorPanel());
+      settingsPanel.add(getCrossoverOperatorPanel());
+      settingsPanel.add(getMutationOperatorPanel());
+      settingsPanel.add(getGraphPanel());
+      BoxLayout settingsPanelLayout = new BoxLayout(settingsPanel, BoxLayout.Y_AXIS);
+      settingsPanel.setLayout(settingsPanelLayout);
+      contentPanel.add(settingsPanel);
 
       contentPanel.add(getResultsPanel());
 
@@ -210,6 +238,36 @@ public class TSPGAController {
 
     private JPanel resultsPanel;
     private JLabel resultImageLabel;
+    
+    private JTextField populationSizeTextField;
+    private JTextField generationsCountTextField;
+    private JTextField crossoverChanceTextField;
+    private JTextField mutationChanceTextField;
+
+    private JPanel getGeneralSettingsPanel() {
+      JPanel settingsPanel = new JPanel();
+
+      settingsPanel.add(new JLabel("Population size"));
+      populationSizeTextField = new JTextField(Integer.toString(populationSize));
+      settingsPanel.add(populationSizeTextField);
+
+      settingsPanel.add(new JLabel("Generations count"));
+      generationsCountTextField = new JTextField(Integer.toString(generationsCount));
+      settingsPanel.add(generationsCountTextField);
+
+      settingsPanel.add(new JLabel("Crossover chance"));
+      crossoverChanceTextField = new JTextField(Double.toString(crossoverChance));
+      settingsPanel.add(crossoverChanceTextField);
+
+      settingsPanel.add(new JLabel("Mutation chance"));
+      mutationChanceTextField = new JTextField(Double.toString(mutationChance));
+      settingsPanel.add(mutationChanceTextField);
+
+      BoxLayout l = new BoxLayout(settingsPanel, BoxLayout.Y_AXIS);
+      settingsPanel.setLayout(l);
+
+      return settingsPanel;
+    }
 
     private JPanel getSelectionOperatorPanel() {
       JPanel selectionOperatorsPanel = new JPanel();
@@ -263,18 +321,27 @@ public class TSPGAController {
       }
 
       public void actionPerformed(ActionEvent e) {
+        resetSeed();
+        shortestPath = null;
+
         Graph graph = TSPLibParser.getGraph((String) graphCombo.getSelectedItem());
         PathSelectionOperator selectionOperator = (PathSelectionOperator) selectionOperatorCombo.getSelectedItem();
         PathCrossoverOperator crossoverOperator = (PathCrossoverOperator) crossoverOperatorCombo.getSelectedItem();
         PathMutationOperator mutationOperator = (PathMutationOperator) mutationOperatorCombo.getSelectedItem();
 
+        crossoverOperator.setCrossoverChance(Double.parseDouble(crossoverChanceTextField.getText()));
+        mutationOperator.setMutationChance(Double.parseDouble(mutationChanceTextField.getText()));
+
         generation = new GenerationTSPSciezkowa(graph, selectionOperator, crossoverOperator, mutationOperator);
-        generation.initialize(populationSize);
+        generation.initialize(Integer.parseInt(populationSizeTextField.getText()));
         gnuplotFileContent = new StringBuilder();
+
+        int generationsCount = Integer.parseInt(generationsCountTextField.getText());
 
         logStats(1);
         for (int i = 0; i < generationsCount; i++) {
           generation = generation.getNext();
+          TSPGAController.saveShortestPath(generation.getBestIndividual());
           logStats(2+i);
         }
         File output = saveGnuplotFile();

@@ -18,19 +18,18 @@ public class PathSelectionOperatorTournament implements PathSelectionOperator {
   public ArrayList<Path> filter(ArrayList<Path> paths) {
     ArrayList<Path> result = new ArrayList<Path>();
 
-    int counter = 0;
-    while (result.size() != paths.size()) {
-      counter++;
-      result.add(this.getNewTournamentWinner(paths));
+    for (Path p : paths) {
+      result.add(this.getNewTournamentWinner(paths, p));
     }
-    Main.log("Performed " + counter + " selections");
+    Main.log("Performed " + paths.size() + " selections");
 
     return result;
   }
 
-  private Path getNewTournamentWinner(ArrayList<Path> paths) {
+  private Path getNewTournamentWinner(ArrayList<Path> paths, Path individual) {
     ArrayList<Path> group = new ArrayList<Path>();
-    for (int i = 0; i < this.groupSize; i++) {
+    group.add(individual);
+    for (int i = 0; i < this.groupSize - 1; i++) {
       Path p = paths.get(TSPGAController.nextInt(paths.size()));
       group.add(p);
     }

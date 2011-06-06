@@ -31,6 +31,7 @@ public class PathSciezkowa extends Path {
       return true;
     } else {
       Main.log("Node already exists");
+      Main.log("Path size: " + path.size());
     }
     return false;
   }
@@ -64,22 +65,11 @@ public class PathSciezkowa extends Path {
 
   public double getDistance() {
     double distance = 0;
-    Node from = null;
-    for (Node to : path) {
-      if (from == null) {
-        from = to;
-        continue;
-      }
-      if (graph.getEdge(from, to) == null) {
-        Main.log("* ERROR * No such edge in graph " + graph.getName() + ". From node " + from.getNumber() + " to node " + to.getNumber());
-        Main.log("\tPath is valid: " + isValid());
-        Main.log("\tPath: " + path.toString());
-      } else {
-        
-      }
-      distance += graph.getEdge(from, to).getDistance();
+    for (int i = 0; i < getNodesCount() - 1; i++) {
+      Edge e = getEdge(i);
+      distance += e.getDistance();
     }
-    distance += graph.getEdge(path.get(path.size() - 1), path.get(0)).getDistance();
+    distance += graph.getEdge(path.get(0), path.get(getNodesCount() - 1)).getDistance();
     return distance;
   }
 

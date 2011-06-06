@@ -16,6 +16,9 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException, FileNotFoundException, EdgeExistsException, URISyntaxException {
+//      Graph graph = TSPLibParser.getGraph("resources/berlin52.tsp");
+//      Main.log(graph.getShortestTour().getDistance());
+//      Main.log(graph.getShortestTour().toString());
 //      try {
 //        PathCrossoverOperator pco = new PathSciezkowaCrossoverOperatorWithEdgeRecombination();
 

@@ -1,12 +1,9 @@
 package info.blazey.uksw.ain.tsp;
 
 import info.blazey.uksw.ain.tsp.Graph.EdgeExistsException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.logging.Logger;
 
 /**
  *
@@ -71,7 +68,10 @@ public class TSPLibParser {
     } catch (EdgeExistsException ex) {
       ex.printStackTrace();
     }
-    
+
+    graph.setShortestTour(getShortestTour(resourceName));
+
+//    Main.log("Distance from 1 to 49: " + graph.getEdge(new Node(0), new Node(48)).getDistance());
 
     Main.log("* Graph filled:");
     Main.log("\tName: " + graph.getName());
@@ -183,6 +183,31 @@ public class TSPLibParser {
       towns.add(index, new Node(index));
     }
     return towns.get(index);
+  }
+
+  private static Path getShortestTour(String resourceName) {
+    Path shortestTour = new PathSciezkowa(graph);
+    String tourFileName = resourceName.substring(0, resourceName.length() - 3) + "opt.tour";
+
+    InputStream is = TSPGAController.class.getResourceAsStream(tourFileName);
+
+    if (is == null) {
+      return null;
+    }
+
+    Scanner scanner = new Scanner(is);
+
+    while (!scanner.nextLine().trim().equals("TOUR_SECTION")) { }
+
+    String line = scanner.nextLine().trim();
+    while (!line.equals("-1")) {
+      shortestTour.appendNode(new Node(Integer.parseInt(line) - 1));
+      line = scanner.nextLine().trim();
+    }
+
+    Main.log(shortestTour.getDistance());
+
+    return shortestTour;
   }
 
 }

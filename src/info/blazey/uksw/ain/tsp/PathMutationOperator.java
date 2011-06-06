@@ -4,10 +4,22 @@ package info.blazey.uksw.ain.tsp;
  *
  * @author blazej
  */
-public interface PathMutationOperator {
+public abstract class PathMutationOperator {
 
-  public void performMutation(Path p);
+  protected double chance;
 
-  public boolean mutate();
+  public PathMutationOperator(double chance) {
+    this.chance = chance;
+  }
+
+  public void setMutationChance(double chance) {
+    this.chance = chance;
+  }
+
+  public abstract void performMutation(Path p);
+
+  public boolean mutate() {
+    return TSPGAController.nextDouble() <= chance;
+  }
 
 }

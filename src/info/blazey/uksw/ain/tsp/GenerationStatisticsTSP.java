@@ -6,10 +6,17 @@ package info.blazey.uksw.ain.tsp;
  */
 public class GenerationStatisticsTSP implements GenerationStatistics {
 
-  private Generation generation;
+  private double bestPathLenght = 0;
 
-  public GenerationStatisticsTSP(Generation generation) {
+  private GenerationTSP generation;
+
+  public GenerationStatisticsTSP(GenerationTSP generation) {
     this.generation = generation;
+
+    Path shortestTour = generation.getGraph().getShortestTour();
+    if (shortestTour != null) {
+      bestPathLenght = shortestTour.getDistance();
+    }
   }
 
   public double getBest() {
@@ -48,7 +55,7 @@ public class GenerationStatisticsTSP implements GenerationStatistics {
   }
 
   public String getGnuplotRow(int generationNumber) {
-    return generationNumber + "\t\t" + getBest() + "\t\t" + getAverage() + "\t\t" + getWorst() + "\n";
+    return generationNumber + "\t\t" + getBest() + "\t\t" + getAverage() + "\t\t" + getWorst() + "\t\t" + bestPathLenght + "\n";
   }
 
 }

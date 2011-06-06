@@ -4,12 +4,10 @@ package info.blazey.uksw.ain.tsp;
  *
  * @author blazej
  */
-public class PathSciezkowaMutationOperatorSwap implements PathMutationOperator {
-
-  private double chance;
+public class PathSciezkowaMutationOperatorSwap extends PathMutationOperator {
 
   public PathSciezkowaMutationOperatorSwap(double chance) {
-    this.chance = chance;
+    super(chance);
   }
 
   public void performMutation(Path path) {
@@ -19,12 +17,6 @@ public class PathSciezkowaMutationOperatorSwap implements PathMutationOperator {
       index2 = TSPGAController.nextInt(path.getNodesCount());
     }
     path.swapNodes(index1, index2);
-    
-//    Main.log("Mutation performed. Path valid: " + path.isValid());
-  }
-
-  public boolean mutate() {
-    return TSPGAController.nextDouble() <= chance;
   }
 
   @Override
